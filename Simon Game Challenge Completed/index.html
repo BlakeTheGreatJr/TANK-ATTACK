@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Manager</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container">
+    <div id="errorBox" style="display:none; background:red; color:white; padding:15px; margin:10px; border-radius:5px;"></div>
+    <div id="sharingNotif" style="background:#4CAF50; color:white; padding:12px 15px; margin:10px; border-radius:5px; text-align:center; font-weight:bold;">
+      ✨ Real-time sharing enabled! Your contacts are automatically shared with others on this site.
+    </div>
+    <header>
+      <h1>📇 Contact Manager</h1>
+      <p>Keep all your contacts in one place - shared in real-time!</p>
+    </header>
+
+    <div class="main-content">
+      <div class="form-section">
+        <h2>Add New Contact</h2>
+        <form id="contactForm">
+          <div class="form-group">
+            <label for="name">Name *</label>
+            <input type="text" id="name" required placeholder="Full name">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" required placeholder="Email address">
+          </div>
+
+          
+
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" placeholder="Additional notes"></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit">Add Contact</button>
+        </form>
+      </div>
+
+      <div class="contacts-section" style="width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2>Your Contacts (<span id="contactCount">0</span>)</h2>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-action" onclick="contactManager.exportContacts()">📤 Export</button>
+            <button class="btn-action" onclick="contactManager.importContacts()">📥 Import</button>
+          </div>
+        </div>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Search contacts by name...">
+        </div>
+        <div id="contactsList" class="contacts-list"></div>
+      </div>
+
+      <div id="chatSection" class="chat-section" style="display:none;">
+        <div class="chat-header">
+          <button class="btn-back" onclick="contactManager.closeChat()">← Back</button>
+          <h2 id="chatName">Chat</h2>
+        </div>
+        <div id="chatMessages" class="chat-messages"></div>
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" placeholder="Type a message...">
+          <button class="btn-send" onclick="contactManager.sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="importFile" accept=".json" style="display:none;">
+
+  <script src="game.js" charset="utf-8"></script>
+
+</body>
+
+</html>

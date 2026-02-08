@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Contact Sharing Test</title>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        .test-section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-left: 4px solid #4CAF50; }
+        input { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; }
+        button { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #45a049; }
+        .contact-item { background: white; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }
+        .shared { border-left: 4px solid #4CAF50; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📇 Real-Time Contact Sharing Test</h1>
+        
+        <div class="status info">
+            ✨ This page automatically shares contacts between all open tabs/windows!
+        </div>
+
+        <div class="test-section">
+            <h2>Add a Contact</h2>
+            <input type="text" id="nameInput" placeholder="Contact name" />
+            <input type="email" id="emailInput" placeholder="Email address" />
+            <input type="text" id="notesInput" placeholder="Notes (optional)" />
+            <button onclick="addContact()">➕ Add Contact</button>
+        </div>
+
+        <div class="test-section">
+            <h2>Your Contacts</h2>
+            <div id="yourContacts">No contacts yet</div>
+        </div>
+
+        <div class="test-section">
+            <h2>👥 Shared Contacts (from others)</h2>
+            <div id="sharedContacts">No shared contacts yet</div>
+        </div>
+
+        <div class="test-section" id="debugSection">
+            <h2>Debug Info</h2>
+            <p>Checking localStorage...</p>
+            <div id="debugInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        const myUserId = 'test_' + Math.random().toString(36).substr(2, 9);
+        let myContacts = JSON.parse(localStorage.getItem('mycontacts_' + myUserId) || '[]');
+
+        function addContact() {
+            const name = document.getElementById('nameInput').value.trim();
+            const email = document.getElementById('emailInput').value.trim();
+            const notes = document.getElementById('notesInput').value.trim();
+
+            if (!name || !email) {
+                alert('Please enter name and email');
+                return;
+            }
+
+            myContacts.push({
+                id: Date.now(),
+                name: name,
+                email: email,
+                notes: notes
+            });
+
+            localStorage.setItem('mycontacts_' + myUserId, JSON.stringify(myContacts));
+            
+            document.getElementById('nameInput').value = '';
+            document.getElementById('emailInput').value = '';
+            document.getElementById('notesInput').value = '';
+            
+            render();
+            alert('✅ Contact added and shared!');
+        }
+
+        function render() {
+            // Show your contacts
+            const yourDiv = document.getElementById('yourContacts');
+            if (myContacts.length === 0) {
+                yourDiv.innerHTML = '<p style="color: #999;">No contacts added yet</p>';
+            } else {
+                yourDiv.innerHTML = myContacts.map(c => `
+                    <div class="contact-item">
+                        <strong>${c.name}</strong><br/>
+                        📧 ${c.email}<br/>
+                        ${c.notes ? `📝 ${c.notes}` : ''}
+                    </div>
+                `).join('');
+            }
+
+            // Show shared contacts from others
+            const sharedDiv = document.getElementById('sharedContacts');
+            let allShared = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('mycontacts_') && !key.includes(myUserId)) {
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key) || '[]');
+                        allShared = allShared.concat(data);
+                    } catch(e) {
+                        console.error('Parse error:', e);
+                    }
+                }
+            }
+
+            if (allShared.length === 0) {
+                sharedDiv.innerHTML = '<p style="color: #999;">No shared contacts yet. Open this in another tab and add a contact!</p>';
+            } else {
+                sharedDiv.innerHTML = allShared.map(c => `
+                    <div class="contact-item shared">
+                        👥 <strong>${c.name}</strong><br/>
+                        📧 ${c.email}<br/>
+                        ${c.notes ? `📝 ${c.notes}` : ''}
+                    </div>
+                `).join('');
+            }
+
+            // Debug info
+            const debugDiv = document.getElementById('debugInfo');
+            const storageItems = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('mycontacts_')) {
+                    storageItems.push(`<div><strong>${key}</strong>: ${localStorage.getItem(key).substring(0, 50)}...</div>`);
+                }
+            }
+            debugDiv.innerHTML = '<p>My User ID: <code>' + myUserId + '</code></p>' + (storageItems.length > 0 ? storageItems.join('') : '<p style="color: #999;">No items in localStorage yet</p>');
+        }
+
+        // Listen for storage changes
+        window.addEventListener('storage', () => {
+            render();
+        });
+
+        // Check for changes every 1 second (same-tab updates)
+        setInterval(() => {
+            render();
+        }, 1000);
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
